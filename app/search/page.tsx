@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -11,7 +11,7 @@ import Link from "next/link"
 import { RoleBadge } from "@/components/ui/role-badge"
 import { useToast } from "@/hooks/use-toast"
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams()
   const query = searchParams.get("query") || ""
   const [searchQuery, setSearchQuery] = useState(query)
@@ -79,7 +79,6 @@ export default function SearchPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
-
       <form onSubmit={handleSearch} className="mb-4 sm:mb-6">
         <div className="flex flex-col sm:flex-row gap-2">
           <Input
@@ -167,5 +166,13 @@ export default function SearchPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6 text-xs sm:text-sm text-gray-500">Loading search results...</div>}>
+      <SearchContent />
+    </Suspense>
   )
 }
