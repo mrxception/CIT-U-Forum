@@ -84,61 +84,59 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
         <span className="font-medium">{course.name}</span>
       </div>
 
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{course.name}</h1>
-          <p className="text-gray-600">{course.description}</p>
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{course.name}</h1>
+            <p className="text-gray-600">{course.description}</p>
+          </div>
+          <Button asChild>
+            <Link href={`/course/${course.id}/new-thread`}>
+              <Plus className="w-4 h-4 mr-2" />
+              New Thread
+            </Link>
+          </Button>
         </div>
-        <Button asChild>
-          <Link href={`/course/${course.id}/new-thread`}>
-            <Plus className="w-4 h-4 mr-2" />
-            New Thread
-          </Link>
-        </Button>
       </div>
 
       <div className="bg-white border border-gray-300">
         <div className="bg-blue-600 text-white px-4 py-2 border-b border-gray-300">
-          <div className="grid grid-cols-12 gap-4 items-center text-sm font-medium">
-            <div className="col-span-6">Thread / Thread Starter</div>
-            <div className="col-span-1 text-center">Replies</div>
-            <div className="col-span-1 text-center">Views</div>
-            <div className="col-span-4 text-center">Last Post</div>
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold">Threads</h2>
+            <div className="hidden sm:flex sm:items-center sm:space-x-8 text-sm">
+              <span className="w-48 text-right">Last Post</span>
+              <span className="w-16 text-center">Replies</span>
+              <span className="w-16 text-center">Views</span>
+            </div>
           </div>
         </div>
 
         {threads.map((thread) => (
-          <div key={thread.id} className="border-b border-gray-300 hover:bg-gray-50">
-            <div className="grid grid-cols-12 gap-4 items-center p-4">
-              <div className="col-span-6 flex items-start space-x-3">
-                <div className="flex items-center space-x-1">
-                  {thread.pinned != 0 && <Pin className="w-4 h-4 text-green-600" />}
-                  {thread.closed != 0 && <Lock className="w-4 h-4 text-red-600" />}
+          <div key={thread.id} className="border-b border-gray-300">
+            <div className="flex flex-col sm:flex-row sm:items-center p-4 gap-4 sm:gap-0">
+              <div className="flex items-center flex-1">
+                <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center mr-4">
                   <MessageSquare className="w-4 h-4 text-blue-600" />
                 </div>
-
-                <div className="flex-1 min-w-0">
+                <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-1">
-                    <Link
-                      href={`/thread/${thread.id}`}
-                      className="font-medium text-blue-600 hover:underline line-clamp-1"
-                    >
+                    <Link href={`/thread/${thread.id}`} className="font-semibold text-blue-600 hover:underline">
                       {thread.title}
                     </Link>
-                      <div className="flex items-center space-x-1">
-                        {thread.pinned != 0 && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Pinned
-                          </span>
-                        )}
-                        {thread.closed != 0 && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                            Closed
-                          </span>
-                        )}
-                      </div>
+                    <div className="flex items-center space-x-1">
+                      {thread.pinned != 0 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Pinned
+                        </span>
+                      )}
+                      {thread.closed != 0 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          Closed
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                  <div className="flex items-center space-x-2 text-xs text-gray-500">
                     <Avatar className="w-4 h-4">
                       <AvatarImage
                         src={
@@ -153,29 +151,32 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
                       </AvatarFallback>
                     </Avatar>
                     <span>by {thread.username}</span>
-                    <span>•</span>
                     <span>{new Date(thread.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="col-span-1 text-center">
-                <div className="font-semibold">{thread.reply_count}</div>
-              </div>
-
-              <div className="col-span-1 text-center">
-                <div className="font-semibold">{thread.views}</div>
-              </div>
-
-              <div className="col-span-4 text-right text-sm">
-                {thread.last_reply_time ? (
-                  <div>
-                    <div className="font-medium">{new Date(thread.last_reply_time).toLocaleDateString()}</div>
-                    <div className="text-gray-500">by {thread.last_reply_user}</div>
-                  </div>
-                ) : (
-                  <div className="text-gray-500">No replies yet</div>
-                )}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-8 text-sm gap-2 sm:gap-0">
+                <div className="w-full sm:w-48 sm:text-right">
+                  {thread.last_reply_time ? (
+                    <div>
+                      <div className="font-medium text-blue-600">
+                        {new Date(thread.last_reply_time).toLocaleDateString()}
+                      </div>
+                      <div className="text-xs text-gray-500">by {thread.last_reply_user}</div>
+                    </div>
+                  ) : (
+                    <span className="text-gray-500">No replies yet</span>
+                  )}
+                </div>
+                <div className="flex items-center sm:w-16 sm:text-center">
+                  <span className="font-semibold sm:hidden mr-2">Replies:</span>
+                  <span className="font-semibold">{thread.reply_count.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center sm:w-16 sm:text-center">
+                  <span className="font-semibold sm:hidden mr-2">Views:</span>
+                  <span className="font-semibold">{thread.views.toLocaleString()}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -198,11 +199,11 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
       <div className="mt-6 bg-gray-50 border border-gray-300 p-4">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <div>
-            <strong>{course.name}:</strong> {threads.length} threads,{" "}
+            <strong>{course.name} Statistics:</strong> {threads.length} threads,{" "}
             {threads.reduce((sum, t) => sum + t.reply_count, 0)} replies
           </div>
-          <div className="flex items-center">
-            <Clock className="w-4 h-4 mr-1" />
+          <div>
+            <Clock className="w-4 h-4 inline mr-1" />
             All times are GMT +8
           </div>
         </div>

@@ -140,21 +140,26 @@ export default function Header() {
             {user ? (
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <Avatar className="w-6 h-6">
-                    <AvatarImage
-                      src={
-                        user.avatar && user.avatar !== "/placeholder.svg?height=40&width=40" ? user.avatar : undefined
-                      }
-                      alt={user.username}
-                    />
-                    <AvatarFallback className="bg-blue-600 text-white text-xs font-bold">
-                      {getInitials(user.username)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm text-gray-900">
-                    Welcome, <strong>{user.username}</strong>
-                  </span>
-                  <RoleBadge roleName={user.role_name} isBanned={user.banned} />
+                  {/* Hide Avatar on mobile, show on sm and above */}
+                  <div className="hidden sm:flex">
+                    <Avatar className="w-6 h-6">
+                      <AvatarImage
+                        src={
+                          user.avatar && user.avatar !== "/placeholder.svg?height=40&width=40" ? user.avatar : undefined
+                        }
+                        alt={user.username}
+                      />
+                      <AvatarFallback className="bg-blue-600 text-white text-xs font-bold">
+                        {getInitials(user.username)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="hidden sm:inline text-sm text-gray-900">
+                      Welcome, <strong>{user.username}</strong>
+                    </span>
+                    <RoleBadge roleName={user.role_name} isBanned={user.banned} />
+                  </div>
                 </div>
 
                 <DropdownMenu>
@@ -164,6 +169,12 @@ export default function Header() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href={`/user/${user.id}`}>
+                        <User className="w-4 h-4 mr-2" />
+                        My Profile
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/settings">
                         <Settings className="w-4 h-4 mr-2" />

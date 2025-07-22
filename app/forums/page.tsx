@@ -49,32 +49,33 @@ export default async function ForumsPage() {
             <div className="bg-blue-600 text-white px-4 py-2 border-b border-gray-300">
               <div className="flex items-center justify-between">
                 <h2 className="font-semibold">{college.name}</h2>
-                <div className="flex items-center space-x-8 text-sm">
-                  <span>Last Post</span>
-                  <span>Threads</span>
-                  <span>Posts</span>
+                <div className="hidden sm:flex sm:items-center sm:space-x-8 text-sm">
+                  <span className="w-48 text-right">Last Post</span>
+                  <span className="w-16 text-center">Threads</span>
+                  <span className="w-16 text-center">Posts</span>
                 </div>
               </div>
             </div>
 
             <div className="border-b border-gray-300">
-              <div className="flex items-center p-4">
-                <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center mr-4">
-                  <MessageSquare className="w-4 h-4 text-blue-600" />
-                </div>
-
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <Link href={`/college/${college.id}`} className="font-semibold text-blue-600 hover:underline">
-                      {college.name}
-                    </Link>
+              <div className="flex flex-col sm:flex-row sm:items-center p-4 gap-4 sm:gap-0">
+                <div className="flex items-center flex-1">
+                  <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center mr-4">
+                    <MessageSquare className="w-4 h-4 text-blue-600" />
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">{college.description}</p>
-                  <div className="text-xs text-gray-500">Sub-Forums: {college.course_count} courses</div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <Link href={`/college/${college.id}`} className="font-semibold text-blue-600 hover:underline">
+                        {college.name}
+                      </Link>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">{college.description}</p>
+                    <div className="text-xs text-gray-500">Sub-Forums: {college.course_count} courses</div>
+                  </div>
                 </div>
 
-                <div className="flex items-center space-x-8 text-sm">
-                  <div className="w-48 text-right">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-8 text-sm gap-2 sm:gap-0">
+                  <div className="w-full sm:w-48 sm:text-right">
                     {college.last_activity ? (
                       <div>
                         <div className="font-medium text-blue-600">
@@ -90,12 +91,14 @@ export default async function ForumsPage() {
                     )}
                   </div>
 
-                  <div className="w-16 text-center">
-                    <div className="font-semibold">{college.thread_count.toLocaleString()}</div>
+                  <div className="flex items-center sm:w-16 sm:text-center">
+                    <span className="font-semibold sm:hidden mr-2">Threads:</span>
+                    <span className="font-semibold">{college.thread_count.toLocaleString()}</span>
                   </div>
 
-                  <div className="w-16 text-center">
-                    <div className="font-semibold">{college.post_count.toLocaleString()}</div>
+                  <div className="flex items-center sm:w-16 sm:text-center">
+                    <span className="font-semibold sm:hidden mr-2">Posts:</span>
+                    <span className="font-semibold">{college.post_count.toLocaleString()}</span>
                   </div>
                 </div>
               </div>

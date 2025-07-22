@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { MessageSquare } from "lucide-react"
+import { MessageSquare, Clock } from "lucide-react"
 import pool from "@/lib/db"
 
 async function getCollegeData(collegeId: string) {
@@ -80,33 +80,34 @@ export default async function CollegePage({ params }: { params: Promise<{ id: st
         <div className="bg-blue-600 text-white px-4 py-2 border-b border-gray-300">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold">Course Forums</h2>
-            <div className="flex items-center space-x-8 text-sm">
-              <span>Last Post</span>
-              <span>Threads</span>
-              <span>Posts</span>
+            <div className="hidden sm:flex sm:items-center sm:space-x-8 text-sm">
+              <span className="w-48 text-right">Last Post</span>
+              <span className="w-16 text-center">Threads</span>
+              <span className="w-16 text-center">Posts</span>
             </div>
           </div>
         </div>
 
         {courses.map((course) => (
-          <div key={course.id} className="border-b border-gray-300 hover:bg-gray-50">
-            <div className="flex items-center p-4">
-              <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center mr-4">
-                <MessageSquare className="w-4 h-4 text-green-600" />
-              </div>
-
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-1">
-                  <Link href={`/course/${course.id}`} className="font-semibold text-blue-600 hover:underline">
-                    {course.name}
-                  </Link>
+          <div key={course.id} className="border-b border-gray-300">
+            <div className="flex flex-col sm:flex-row sm:items-center p-4 gap-4 sm:gap-0">
+              <div className="flex items-center flex-1">
+                <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center mr-4">
+                  <MessageSquare className="w-4 h-4 text-blue-600" />
                 </div>
-                <p className="text-sm text-gray-600 mb-2">{course.description}</p>
-                <div className="text-xs text-gray-500">Course discussions and study materials</div>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <Link href={`/course/${course.id}`} className="font-semibold text-blue-600 hover:underline">
+                      {course.name}
+                    </Link>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">{course.description}</p>
+                  <div className="text-xs text-gray-500">Course discussions and study materials</div>
+                </div>
               </div>
 
-              <div className="flex items-center space-x-8 text-sm">
-                <div className="w-48 text-right">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-8 text-sm gap-2 sm:gap-0">
+                <div className="w-full sm:w-48 sm:text-right">
                   {course.last_activity ? (
                     <div>
                       <div className="font-medium text-blue-600">
@@ -119,13 +120,13 @@ export default async function CollegePage({ params }: { params: Promise<{ id: st
                     <span className="text-gray-500">No posts yet</span>
                   )}
                 </div>
-
-                <div className="w-16 text-center">
-                  <div className="font-semibold">{course.thread_count}</div>
+                <div className="flex items-center sm:w-16 sm:text-center">
+                  <span className="font-semibold sm:hidden mr-2">Threads:</span>
+                  <span className="font-semibold">{course.thread_count.toLocaleString()}</span>
                 </div>
-
-                <div className="w-16 text-center">
-                  <div className="font-semibold">{course.post_count}</div>
+                <div className="flex items-center sm:w-16 sm:text-center">
+                  <span className="font-semibold sm:hidden mr-2">Posts:</span>
+                  <span className="font-semibold">{course.post_count.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -146,7 +147,10 @@ export default async function CollegePage({ params }: { params: Promise<{ id: st
             <strong>{college.name} Statistics:</strong> {courses.reduce((sum, c) => sum + c.thread_count, 0)} threads,{" "}
             {courses.reduce((sum, c) => sum + c.post_count, 0)} posts across {courses.length} courses
           </div>
-          <div>All times are GMT +8</div>
+          <div>
+            <Clock className="w-4 h-4 inline mr-1" />
+            All times are GMT +8
+          </div>
         </div>
       </div>
     </div>
