@@ -208,7 +208,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
               <Share className="w-3 h-3 sm:w-4 sm:h-4" />
               <a
                 href={`https://reddit.com/submit?url=${encodeURIComponent(
-                  `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/thread/${id}`,
+                  `${process.env.NEXT_PUBLIC_BASE_URL || "https://cit-forum-orpin.vercel.app"}/thread/${id}`,
                 )}&title=${encodeURIComponent(thread.title)}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -218,7 +218,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
               </a>
               <a
                 href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
-                  `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/thread/${id}`,
+                  `${process.env.NEXT_PUBLIC_BASE_URL || "https://cit-forum-orpin.vercel.app"}/thread/${id}`,
                 )}&text=${encodeURIComponent(thread.title)}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -228,7 +228,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
               </a>
               <a
                 href={`https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                  `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/thread/${id}`,
+                  `${process.env.NEXT_PUBLIC_BASE_URL || "https://cit-forum-orpin.vercel.app"}/thread/${id}`,
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
