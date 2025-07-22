@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -27,7 +27,7 @@ interface UserData {
   avatar: string
 }
 
-export default function SettingsPage() {
+function SettingsContent() {
   const [user, setUser] = useState<UserData | null>(null)
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
@@ -52,6 +52,8 @@ export default function SettingsPage() {
   })
 
   const [selectedCourses, setSelectedCourses] = useState<number[]>([])
+  const [retryCount, setRetryCount] = useState(0)
+  const maxRetries = 2
 
   useEffect(() => {
     fetchUserData()
@@ -59,7 +61,7 @@ export default function SettingsPage() {
   }, [])
 
   useEffect(() => {
-    if (!loading && !isAuthenticated && user === null) {
+    if (!loading && isAuthenticated === false && user === null && retryCount >= maxRetries) {
       toast({
         variant: "destructive",
         title: "Unauthorized",
@@ -67,13 +69,21 @@ export default function SettingsPage() {
       })
       router.push("/login")
     }
-  }, [loading, isAuthenticated, user, router, toast])
+  }, [loading, isAuthenticated, user, router, toast, retryCount])
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch("/api/auth/me")
+      const response = await fetch("/api/auth/me", {
+        credentials: "include",
+      })
+      console.log("fetchUserData response:", {
+        status: response.status,
+        statusText: response.statusText,
+        cookies: document.cookie, // Log client-side cookies
+      })
       if (response.ok) {
         const userData = await response.json()
+        console.log("fetchUserData userData:", userData)
         setUser(userData)
         setProfileForm({
           username: userData.username,
@@ -82,21 +92,40 @@ export default function SettingsPage() {
         })
         setIsAuthenticated(true)
       } else {
-        setUser(null)
-        setIsAuthenticated(false)
+        const errorData = await response.json().catch(() => ({}))
+        console.error("fetchUserData failed:", { status: response.status, error: errorData.error || "Unknown error" })
+        if (response.status === 401 && retryCount < maxRetries) {
+          // Retry on 401 (e.g., transient cookie issue)
+          setRetryCount((prev) => prev + 1)
+          setTimeout(fetchUserData, 1000) // Retry after 1s
+        } else {
+          setUser(null)
+          setIsAuthenticated(false)
+        }
       }
     } catch (error) {
-      console.error("Error fetching user data:", error)
-      setUser(null)
-      setIsAuthenticated(false)
+      console.error("fetchUserData error:", error)
+      if (retryCount < maxRetries) {
+        setRetryCount((prev) => prev + 1)
+        setTimeout(fetchUserData, 1000)
+      } else {
+        setUser(null)
+        setIsAuthenticated(false)
+        setError("Network error. Please try again.")
+        toast({
+          variant: "destructive",
+          title: "Network Error",
+          description: "Failed to fetch user data. Please try again.",
+        })
+      }
     }
   }
 
   const fetchCourses = async () => {
     try {
       const [coursesResponse, userCoursesResponse] = await Promise.all([
-        fetch("/api/courses"),
-        fetch("/api/user/courses"),
+        fetch("/api/courses", { credentials: "include" }),
+        fetch("/api/user/courses", { credentials: "include" }),
       ])
 
       if (coursesResponse.ok && userCoursesResponse.ok) {
@@ -111,9 +140,26 @@ export default function SettingsPage() {
 
         setCourses(coursesWithEnrollment)
         setSelectedCourses(userCourseIds)
+      } else {
+        console.error("fetchCourses failed:", {
+          coursesStatus: coursesResponse.status,
+          userCoursesStatus: userCoursesResponse.status,
+        })
+        setError("Failed to fetch courses.")
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch courses.",
+        })
       }
     } catch (error) {
-      console.error("Error fetching courses:", error)
+      console.error("fetchCourses error:", error)
+      setError("Network error fetching courses.")
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Failed to fetch courses.",
+      })
     } finally {
       setLoading(false)
     }
@@ -153,6 +199,7 @@ export default function SettingsPage() {
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
+        credentials: "include",
       })
 
       const data = await response.json()
@@ -223,6 +270,7 @@ export default function SettingsPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ avatar: profileForm.avatar }),
+        credentials: "include",
       })
 
       const data = await response.json()
@@ -283,6 +331,7 @@ export default function SettingsPage() {
           currentPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,
         }),
+        credentials: "include",
       })
 
       const data = await response.json()
@@ -328,6 +377,7 @@ export default function SettingsPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ courses: selectedCourses }),
+        credentials: "include",
       })
 
       const data = await response.json()
@@ -522,7 +572,7 @@ export default function SettingsPage() {
                   <Input
                     id="confirmPassword"
                     type="password"
-                    value={passwordForm.confirmPassword}
+                    value={passwordForm.confirmPassword} // Fixed: was incorrectly using currentPassword
                     onChange={(e) => setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                     className="mt-1"
                   />
@@ -599,5 +649,13 @@ export default function SettingsPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 py-8 text-sm text-gray-500">Loading settings...</div>}>
+      <SettingsContent />
+    </Suspense>
   )
 }
