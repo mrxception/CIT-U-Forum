@@ -158,9 +158,9 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
             </div>
 
             {badges.length > 0 && (
-              <div className="flex items-center space-x-2 mb-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-x-0 sm:space-x-2 mb-4">
                 <Award className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-600" />
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                   {badges.map((badge, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
                       {badge.icon} {badge.name}
