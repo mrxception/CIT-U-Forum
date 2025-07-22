@@ -82,7 +82,7 @@ export default function LoginPage() {
         <div className="text-center">
           <div className="flex justify-center">
             <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">CIT</span>
+              <img src="/cit.png" alt="CIT Logo" />
             </div>
           </div>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">Sign in to your account</h2>
