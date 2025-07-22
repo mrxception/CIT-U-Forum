@@ -6,20 +6,20 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <div className="flex items-center space-x-2 mb-4">
+            <div className="flex items-center justify-center md:justify-start space-x-2 mb-4">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center">
                 <img src="/cit.png" alt="CIT Logo"/>
               </div>
               <span className="font-bold text-xl text-gray-900">Forum</span>
             </div>
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-600 text-sm text-center md:text-left">
               Discussion forum for Cebu Institute of Technology - University students.
             </p>
           </div>
 
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="font-semibold text-gray-900 mb-4 text-center md:text-left">Quick Links</h3>
+            <ul className="space-y-2 text-sm flex flex-col items-center md:items-start">
               <li>
                 <Link href="/" className="text-gray-600 hover:text-blue-600">
                   Home
@@ -39,8 +39,8 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Support</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="font-semibold text-gray-900 mb-4 text-center md:text-left">Support</h3>
+            <ul className="space-y-2 text-sm flex flex-col items-center md:items-start">
               <li>
                 <Link href="/help" className="text-gray-600 hover:text-blue-600">
                   Help Center
@@ -60,8 +60,8 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">CIT-U</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="font-semibold text-gray-900 mb-4 text-center md:text-left">CIT-U</h3>
+            <ul className="space-y-2 text-sm flex flex-col items-center md:items-start">
               <li>
                 <a
                   href="https://cit.edu"
@@ -77,7 +77,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-200 mt-8 pt-8 text-center text-sm text-gray-600">
-          <p>&copy; 2025 CIT-U Forum. All rights reserved.</p>
+          <p>© 2025 CIT-U Forum. All rights reserved.</p>
         </div>
       </div>
     </footer>
