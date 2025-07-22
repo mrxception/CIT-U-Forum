@@ -314,32 +314,31 @@ export default async function HomePage() {
             <CardTitle>Forum Categories</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {categories.map((category) => (
                 <div
                   key={category.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                  className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                     <div className="flex-1">
                       <Link
                         href={`/college/${category.id}`}
-                        className="text-lg font-semibold text-gray-900 hover:text-blue-600"
+                        className="text-base sm:text-lg font-semibold text-gray-900 hover:text-blue-600"
                       >
                         {category.name}
                       </Link>
-                      <p className="text-gray-600 text-sm mt-1">{category.description}</p>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <span className="text-sm text-gray-500">{category.course_count} courses</span>
-                        <span className="text-sm text-gray-500">{category.thread_count} threads</span>
-                        <span className="text-sm text-gray-500">{category.post_count} posts</span>
+                      <p className="text-gray-600 text-xs sm:text-sm mt-1 line-clamp-2">{category.description}</p>
+                      <div className="flex flex-wrap items-center space-x-2 sm:space-x-4 mt-2">
+                        <span className="text-xs sm:text-sm text-gray-500">{category.course_count} courses</span>
+                        <span className="text-xs sm:text-sm text-gray-500">{category.thread_count} threads</span>
+                        <span className="text-xs sm:text-sm text-gray-500">{category.post_count} posts</span>
                       </div>
                     </div>
-                    <div className="text-right text-sm text-gray-500">
+                    <div className="text-xs sm:text-sm text-gray-500 sm:text-right">
                       {category.last_activity && (
                         <>
-                          <div>Last activity:</div>
-                          <div>{new Date(category.last_activity).toLocaleDateString()}</div>
+                          <div className="text-gray-500">Last activity: {new Date(category.last_activity).toLocaleDateString()}</div>
                           {category.last_user && <div>by {category.last_user}</div>}
                         </>
                       )}
