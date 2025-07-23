@@ -29,6 +29,7 @@ export default function Header() {
     remember: false,
   })
   const [loading, setLoading] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false) // State to track scroll
   const router = useRouter()
   const pathname = usePathname()
   const { toast } = useToast()
@@ -51,6 +52,14 @@ export default function Header() {
       setUser(null)
     }
   }
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0) // Apply glassy effect after any scroll, revert at top
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -111,146 +120,99 @@ export default function Header() {
   }
 
   return (
-    <div className="bg-white border border-gray-300">
-      <div className="bg-gray-100 border-b border-gray-300 px-4 py-2">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              {pathname !== "/" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-6 w-6 sm:w-auto text-xs px-1 sm:px-2"
-                  onClick={() => router.back()}
-                >
-                  <ArrowLeft className="w-4 h-4 sm:mr-1" />
-                  <span className="hidden sm:inline">Back</span>
-                </Button>
-              )}
-              <Link href="/" className="flex items-center space-x-2">
-                <div className="w-6 h-6 rounded flex items-center justify-center">
-                  <img src="/cit.png" alt="CIT Logo" />
-                </div>
-                <span className="font-bold text-lg text-gray-900">CIT-U Forum</span>
-              </Link>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  {/* Hide Avatar on mobile, show on sm and above */}
-                  <div className="hidden sm:flex">
-                    <Avatar className="w-6 h-6">
-                      <AvatarImage
-                        src={
-                          user.avatar && user.avatar !== "/placeholder.svg?height=40&width=40" ? user.avatar : undefined
-                        }
-                        alt={user.username}
-                      />
-                      <AvatarFallback className="bg-blue-600 text-white text-xs font-bold">
-                        {getInitials(user.username)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="hidden sm:inline text-sm text-gray-900">
-                      Welcome, <strong>{user.username}</strong>
-                    </span>
-                    <RoleBadge roleName={user.role_name} isBanned={user.banned} />
-                  </div>
-                </div>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Link href={`/user/${user.id}`}>
-                        <User className="w-4 h-4 mr-2" />
-                        My Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Settings
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            ) : (
-              <>
-                <div className="flex sm:hidden items-center space-x-2">
+    <div>
+      <div className={`bg-white border border-gray-300 sticky top-0 z-10 transition-all duration-300 ${
+        isScrolled ? "bg-white/80 backdrop-blur-md" : ""
+      }`}>
+        <div className={`bg-gray-100 border-b border-gray-300 px-4 py-2 transition-all duration-300 ${
+          isScrolled ? "bg-gray-100/80 backdrop-blur-md" : ""
+        }`}>
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                {pathname !== "/" && (
                   <Button
-                    asChild
-                    size="sm"
-                    disabled={loading}
-                    className="h-6 text-xs px-2"
-                  >
-                    <Link href="/login">Log in</Link>
-                  </Button>
-                  <Button
-                    asChild
-                    size="sm"
                     variant="outline"
-                    disabled={loading}
-                    className="h-6 text-xs px-2"
+                    size="sm"
+                    className="h-6 w-6 sm:w-auto text-xs px-1 sm:px-2"
+                    onClick={() => router.back()}
                   >
-                    <Link href="/register">Register</Link>
+                    <ArrowLeft className="w-4 h-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Back</span>
                   </Button>
+                )}
+                <Link href="/" className="flex items-center space-x-2">
+                  <div className="w-6 h-6 rounded flex items-center justify-center">
+                    <img src="/cit.png" alt="CIT Logo" />
+                  </div>
+                  <span className="font-bold text-lg text-gray-900">CIT-U Forum</span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    {/* Hide Avatar on mobile, show on sm and above */}
+                    <div className="hidden sm:flex">
+                      <Avatar className="w-6 h-6">
+                        <AvatarImage
+                          src={
+                            user.avatar && user.avatar !== "/placeholder.svg?height=40&width=40" ? user.avatar : undefined
+                          }
+                          alt={user.username}
+                        />
+                        <AvatarFallback className="bg-blue-600 text-white text-xs font-bold">
+                          {getInitials(user.username)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="hidden sm:inline text-sm text-gray-900">
+                        Welcome, <strong>{user.username}</strong>
+                      </span>
+                      <RoleBadge roleName={user.role_name} isBanned={user.banned} />
+                    </div>
+                  </div>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href={`/user/${user.id}`}>
+                          <User className="w-4 h-4 mr-2" />
+                          My Profile
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/settings">
+                          <Settings className="w-4 h-4 mr-2" />
+                          Settings
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-                <div className="hidden sm:flex items-center space-x-4">
-                  <form onSubmit={handleLogin} className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-1">
-                      <label className="text-sm text-gray-900">User Name:</label>
-                      <Input
-                        type="text"
-                        value={loginForm.username}
-                        onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
-                        className="w-24 h-6 text-xs"
-                        placeholder="Username"
-                      />
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <label className="text-sm text-gray-900">Password:</label>
-                      <Input
-                        type="password"
-                        value={loginForm.password}
-                        onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
-                        className="w-24 h-6 text-xs"
-                        placeholder="••••••••••••"
-                      />
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Checkbox
-                        id="remember"
-                        checked={loginForm.remember}
-                        onCheckedChange={(checked) => setLoginForm((prev) => ({ ...prev, remember: checked as boolean }))}
-                      />
-                      <label htmlFor="remember" className="text-xs text-gray-900">
-                        Remember Me?
-                      </label>
-                    </div>
+              ) : (
+                <>
+                  <div className="flex sm:hidden items-center space-x-2">
                     <Button
-                      type="submit"
+                      asChild
                       size="sm"
                       disabled={loading}
                       className="h-6 text-xs px-2"
                     >
-                      Log in
+                      <Link href="/login">Log in</Link>
                     </Button>
-                  </form>
-                  <div className="border-l border-gray-300 pl-4">
                     <Button
                       asChild
                       size="sm"
@@ -261,9 +223,64 @@ export default function Header() {
                       <Link href="/register">Register</Link>
                     </Button>
                   </div>
-                </div>
-              </>
-            )}
+                  <div className="hidden sm:flex items-center space-x-4">
+                    <form onSubmit={handleLogin} className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1">
+                        <label className="text-sm text-gray-900">User Name:</label>
+                        <Input
+                          type="text"
+                          value={loginForm.username}
+                          onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
+                          className="w-24 h-6 text-xs"
+                          placeholder="Username"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <label className="text-sm text-gray-900">Password:</label>
+                        <Input
+                          type="password"
+                          value={loginForm.password}
+                          onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
+                          className="w-24 h-6 text-xs"
+                          placeholder="••••••••••••"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Checkbox
+                          id="remember"
+                          checked={loginForm.remember}
+                          onCheckedChange={(checked) =>
+                            setLoginForm((prev) => ({ ...prev, remember: checked as boolean }))
+                          }
+                        />
+                        <label htmlFor="remember" className="text-xs text-gray-900">
+                          Remember Me?
+                        </label>
+                      </div>
+                      <Button
+                        type="submit"
+                        size="sm"
+                        disabled={loading}
+                        className="h-6 text-xs px-2"
+                      >
+                        Log in
+                      </Button>
+                    </form>
+                    <div className="border-l border-gray-300 pl-4">
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="outline"
+                        disabled={loading}
+                        className="h-6 text-xs px-2"
+                      >
+                        <Link href="/register">Register</Link>
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
