@@ -107,7 +107,7 @@ async function getCurrentUser() {
   return await getUserById(decoded.userId)
 }
 
-function UserProfile({ user, stats, isOP = false }: { user: any; stats: any; isOP?: boolean }) {
+function UserProfile({ user, stats, isOP = false, currentUser }: { user: any; stats: any; isOP?: boolean; currentUser: any }) {
   const totalPosts = (stats.thread_count || 0) + (stats.reply_count || 0)
   const joinDate = new Date(user.user_joined || user.created_at).toLocaleDateString("en-US", {
     month: "short",
@@ -118,9 +118,11 @@ function UserProfile({ user, stats, isOP = false }: { user: any; stats: any; isO
     return username.slice(0, 2).toUpperCase()
   }
 
-  const isOnline = user.last_login
-    ? (new Date().getTime() - new Date(user.last_login).getTime()) / 1000 / 60 <= 3
-    : false
+  const isOnline = currentUser && (user.user_id || user.id) === currentUser.id
+    ? true
+    : user.last_login
+      ? (new Date().getTime() - new Date(user.last_login).getTime()) / 1000 / 60 <= 5
+      : false
 
   return (
     <div className="w-full sm:w-32 md:w-48 bg-gray-50 border-r border-gray-300 p-2 sm:p-3 text-xs">
@@ -318,6 +320,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
               user={thread}
               stats={{ thread_count: thread.thread_count, reply_count: thread.reply_count }}
               isOP={true}
+              currentUser={currentUser}
             />
             <div className="flex-1 p-2 sm:p-4">
               <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -370,6 +373,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
               <UserProfile
                 user={reply}
                 stats={{ thread_count: reply.user_thread_count, reply_count: reply.user_reply_count }}
+                currentUser={currentUser}
               />
               <div className="flex-1 p-2 sm:p-4">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
