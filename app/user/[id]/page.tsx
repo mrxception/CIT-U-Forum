@@ -159,7 +159,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
 
             {badges.length > 0 && (
               <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-x-0 sm:space-x-2 mb-4">
-                <Award className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-600" />
+                <Award className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-600 mb-2 sm:mb-0" />
                 <div className="flex flex-wrap justify-center sm:justify-start gap-2">
                   {badges.map((badge, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
@@ -176,7 +176,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                 isBanned={user.banned}
                 canDelete={!!canDelete}
                 username={user.username}
-                roleId={user.role_id} 
+                roleId={user.role_id}
               />
             )}
           </div>

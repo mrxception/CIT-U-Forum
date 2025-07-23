@@ -23,13 +23,19 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 })
     }
 
-    const { action } = await request.json()
+    const body = await request.json()
+    const { action, roleId } = body
     const userId = Number.parseInt(id)
 
     if (action === "ban") {
       await pool.execute("UPDATE users SET banned = 1 WHERE id = ?", [userId])
     } else if (action === "unban") {
       await pool.execute("UPDATE users SET banned = 0 WHERE id = ?", [userId])
+    } else if (action === "setRole") {
+      if (roleId === undefined || isNaN(Number(roleId)) || Number(roleId) < 1 || Number(roleId) > 4) {
+        return NextResponse.json({ error: "Invalid roleId" }, { status: 400 })
+      }
+      await pool.execute("UPDATE users SET role_id = ? WHERE id = ?", [Number(roleId), userId])
     } else {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 })
     }

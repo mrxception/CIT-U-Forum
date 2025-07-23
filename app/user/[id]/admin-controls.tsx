@@ -114,7 +114,7 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
       const response = await fetch(`/api/admin/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "updateRole", roleId: newRoleId }),
+        body: JSON.stringify({ action: "setRole", roleId: newRoleId }),
       })
 
       if (response.ok) {
@@ -125,11 +125,11 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
         router.refresh()
       } else {
         const data = await response.json()
-        console.log("API Response:", data) 
+        console.log("API Response:", data)
         toast({
           variant: "destructive",
           title: "Error",
-          description: data.error || "Failed to update user role. Check server logs.",
+          description: data.error || "Role update not supported. Server needs to be updated.",
         })
       }
     } catch (error) {
