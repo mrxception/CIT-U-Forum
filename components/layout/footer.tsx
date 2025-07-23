@@ -10,7 +10,7 @@ export default function Footer() {
               <div className="w-8 h-8 rounded-lg flex items-center justify-center">
                 <img src="/cit.png" alt="CIT Logo"/>
               </div>
-              <span className="font-bold text-xl text-gray-900">Forum</span>
+              <span className="font-bold text-xl text-gray-900">CIT-U Forum</span>
             </div>
             <p className="text-gray-600 text-sm text-center md:text-left">
               Discussion forum for Cebu Institute of Technology - University students.
