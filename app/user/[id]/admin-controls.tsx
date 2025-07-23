@@ -35,7 +35,6 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
 
   const canBanOrDelete = currentUserRole === 4 || (currentUserRole === 3 && roleId < 3)
   const canUpdateRole = currentUserRole === 4 
-
   const handleBanToggle = async () => {
     if (!canBanOrDelete) {
       toast({
