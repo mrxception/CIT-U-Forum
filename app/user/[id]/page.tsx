@@ -10,6 +10,17 @@ import Link from "next/link"
 import { RoleBadge } from "@/components/ui/role-badge"
 import AdminControls from "./admin-controls"
 
+interface User {
+  id: number
+  username: string
+  role_id: number
+  role_name: string
+  avatar?: string
+  created_at: string
+  last_login?: string
+  banned: boolean
+}
+
 async function getUserProfile(userId: string) {
   try {
     const user = await getUserById(Number.parseInt(userId))
@@ -98,7 +109,7 @@ async function getCurrentUser() {
   const decoded = verifyToken(token)
   if (!decoded) return null
 
-  return await getUserById(decoded.userId)
+  return await getUserById(decoded.userId) as User | null
 }
 
 export default async function UserProfilePage({ params }: { params: Promise<{ id: string }> }) {
@@ -177,6 +188,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                 canDelete={!!canDelete}
                 username={user.username}
                 roleId={user.role_id}
+                currentUserRole={currentUser.role_id} // Pass currentUserRole
               />
             )}
           </div>

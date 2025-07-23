@@ -18,13 +18,27 @@ import { useRouter } from "next/navigation"
 import { Ban, Trash2, UserCheck, ShieldCheck } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+enum Role {
+  Member = 1,
+  VIP = 2,
+  Moderator = 3,
+  God = 4,
+}
+
+const roles = [
+  { id: Role.Member, name: "Member" },
+  { id: Role.VIP, name: "VIP" },
+  { id: Role.Moderator, name: "Moderator" },
+  { id: Role.God, name: "God" },
+]
+
 interface AdminControlsProps {
   userId: number
   isBanned: boolean
   canDelete: boolean
   username: string
   roleId: number
-  currentUserRole: number 
+  currentUserRole: number
 }
 
 export default function AdminControls({ userId, isBanned, canDelete, username, roleId, currentUserRole }: AdminControlsProps) {
@@ -33,8 +47,9 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
   const { toast } = useToast()
   const router = useRouter()
 
-  const canBanOrDelete = currentUserRole === 4 || (currentUserRole === 3 && roleId < 3)
-  const canUpdateRole = currentUserRole === 4 
+  const canBanOrDelete = currentUserRole === Role.God || (currentUserRole === Role.Moderator && roleId < Role.Moderator)
+  const canUpdateRole = currentUserRole === Role.God
+
   const handleBanToggle = async () => {
     if (!canBanOrDelete) {
       toast({
@@ -128,7 +143,7 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
     }
     if (!selectedRole) return
     const newRoleId = Number.parseInt(selectedRole)
-    if (isNaN(newRoleId) || newRoleId < 1 || newRoleId > 4) {
+    if (isNaN(newRoleId) || newRoleId < Role.Member || newRoleId > Role.God) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -147,12 +162,11 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
       if (response.ok) {
         toast({
           title: "Role Updated",
-          description: `${username}'s role has been updated to ${newRoleId} successfully.`,
+          description: `${username}'s role has been updated successfully.`,
         })
         router.refresh()
       } else {
         const data = await response.json()
-        console.log("API Response:", data)
         toast({
           variant: "destructive",
           title: "Error",
@@ -233,10 +247,11 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
             <SelectValue placeholder="Select Role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="1" className="text-xs sm:text-sm">Member</SelectItem>
-            <SelectItem value="2" className="text-xs sm:text-sm">VIP</SelectItem>
-            <SelectItem value="3" className="text-xs sm:text-sm">Moderator</SelectItem>
-            <SelectItem value="4" className="text-xs sm:text-sm">God</SelectItem>
+            {roles.map((role) => (
+              <SelectItem key={role.id} value={role.id.toString()} className="text-xs sm:text-sm">
+                {role.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Button
