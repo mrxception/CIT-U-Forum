@@ -13,13 +13,31 @@ import QuoteDisplay from "./qoute-display"
 import ViewFirstUnreadButton from "./view-first-unread-button"
 import { RoleBadge } from "@/components/ui/role-badge"
 
+async function retryQuery(query: string, params: any[], maxRetries = 3, delayMs = 1000) {
+  let lastError: any;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await pool.execute(query, params);
+      return; 
+    } catch (error: any) {
+      lastError = error;
+      if (error.code === 'ER_LOCK_WAIT_TIMEOUT' && attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+        continue;
+      }
+      throw error; 
+    }
+  }
+  throw lastError; 
+}
+
 async function getThreadData(threadId: string) {
   try {
     const [threadRows] = await pool.execute(
       `
       SELECT t.id, t.title, t.content, t.views, t.created_at, t.closed, t.pinned,
-             t.user_id, u.username, u.avatar, u.created_at as user_joined, u.role_id, u.banned,
-             u.last_activity, c.name as course_name, c.id as course_id,
+             t.user_id, u.username, u.avatar, u.created_at as user_joined, u.last_login, u.role_id, u.banned,
+             c.name as course_name, c.id as course_id,
              col.name as college_name, col.id as college_id,
              r.name as role_name
       FROM threads t
@@ -52,8 +70,8 @@ async function getThreadData(threadId: string) {
     const [replyRows] = await pool.execute(
       `
       SELECT r.id, r.content, r.created_at,
-             u.id as user_id, u.username, u.avatar, u.created_at as user_joined, u.role_id, u.banned,
-             u.last_activity, role.name as role_name,
+             u.id as user_id, u.username, u.avatar, u.created_at as user_joined, u.last_login, u.role_id, u.banned,
+             role.name as role_name,
              (SELECT COUNT(*) FROM threads WHERE user_id = u.id) as user_thread_count,
              (SELECT COUNT(*) FROM replies WHERE user_id = u.id) as user_reply_count
       FROM replies r
@@ -65,7 +83,7 @@ async function getThreadData(threadId: string) {
       [threadId],
     )
 
-    await pool.execute("UPDATE threads SET views = views + 1 WHERE id = ?", [threadId])
+    await retryQuery("UPDATE threads SET views = views + 1 WHERE id = ?", [threadId])
 
     return {
       thread: { ...thread, ...starterStats },
@@ -95,13 +113,14 @@ function UserProfile({ user, stats, isOP = false }: { user: any; stats: any; isO
     month: "short",
     year: "numeric",
   })
-  const isOnline = user.last_activity
-    ? (new Date().getTime() - new Date(user.last_activity).getTime()) / 1000 < 300
-    : false
 
   const getInitials = (username: string) => {
     return username.slice(0, 2).toUpperCase()
   }
+
+  const isOnline = user.last_login
+    ? (new Date().getTime() - new Date(user.last_login).getTime()) / 1000 / 60 <= 3
+    : false
 
   return (
     <div className="w-full sm:w-32 md:w-48 bg-gray-50 border-r border-gray-300 p-2 sm:p-3 text-xs">
@@ -117,7 +136,6 @@ function UserProfile({ user, stats, isOP = false }: { user: any; stats: any; isO
           <RoleBadge roleName={user.role_name} isBanned={user.banned} />
         </div>
         {isOP && <div className="text-green-600 font-semibold mt-1">Thread Starter</div>}
-        {isOnline && <div className="text-blue-600 font-semibold mt-1">Online Now</div>}
       </div>
 
       <div className="mb-2 sm:mb-3">
@@ -130,6 +148,12 @@ function UserProfile({ user, stats, isOP = false }: { user: any; stats: any; isO
             {getInitials(user.username)}
           </AvatarFallback>
         </Avatar>
+      </div>
+
+      <div className="text-center mb-2 sm:mb-3">
+        <span className={`text-xs ${isOnline ? "text-green-600" : "text-gray-500"}`}>
+          {isOnline ? "Online" : "Offline"}
+        </span>
       </div>
 
       <div className="space-y-1 text-gray-700">
@@ -296,15 +320,15 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
               isOP={true}
             />
             <div className="flex-1 p-2 sm:p-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 sm:mb-3 gap-2 sm:gap-0">
-                <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600 order-1 sm:order-2">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
                   <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>
                     {new Date(thread.created_at).toLocaleDateString()},{" "}
                     {new Date(thread.created_at).toLocaleTimeString()}
                   </span>
                 </div>
-                <div className="text-xs sm:text-sm font-bold text-gray-600 order-2 sm:order-1">#1</div>
+                <div className="text-xs sm:text-sm font-bold text-gray-600">#1</div>
               </div>
 
               <div className="prose max-w-none text-sm sm:text-base">
@@ -348,15 +372,15 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
                 stats={{ thread_count: reply.user_thread_count, reply_count: reply.user_reply_count }}
               />
               <div className="flex-1 p-2 sm:p-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 sm:mb-3 gap-2 sm:gap-0">
-                  <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600 order-1 sm:order-2">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
                     <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>
                       {new Date(reply.created_at).toLocaleDateString()},{" "}
                       {new Date(reply.created_at).toLocaleTimeString()}
                     </span>
                   </div>
-                  <div className="text-xs sm:text-sm font-bold text-gray-600 order-2 sm:order-1">#{index + 2}</div>
+                  <div className="text-xs sm:text-sm font-bold text-gray-600">#{index + 2}</div>
                 </div>
 
                 <div className="prose max-w-none text-sm sm:text-base">
