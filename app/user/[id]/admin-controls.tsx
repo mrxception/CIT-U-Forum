@@ -24,15 +24,27 @@ interface AdminControlsProps {
   canDelete: boolean
   username: string
   roleId: number
+  currentUserRole: number 
 }
 
-export default function AdminControls({ userId, isBanned, canDelete, username, roleId }: AdminControlsProps) {
+export default function AdminControls({ userId, isBanned, canDelete, username, roleId, currentUserRole }: AdminControlsProps) {
   const [loading, setLoading] = useState(false)
   const [selectedRole, setSelectedRole] = useState<string>(roleId.toString())
   const { toast } = useToast()
   const router = useRouter()
 
+  const canBanOrDelete = currentUserRole === 4 || (currentUserRole === 3 && roleId < 3)
+  const canUpdateRole = currentUserRole === 4 
+
   const handleBanToggle = async () => {
+    if (!canBanOrDelete) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You do not have permission to ban/unban this user.",
+      })
+      return
+    }
     setLoading(true)
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
@@ -67,6 +79,14 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
   }
 
   const handleDelete = async () => {
+    if (!canBanOrDelete) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You do not have permission to delete this user.",
+      })
+      return
+    }
     setLoading(true)
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
@@ -99,6 +119,14 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
   }
 
   const handleRoleChange = async () => {
+    if (!canUpdateRole) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You do not have permission to update roles.",
+      })
+      return
+    }
     if (!selectedRole) return
     const newRoleId = Number.parseInt(selectedRole)
     if (isNaN(newRoleId) || newRoleId < 1 || newRoleId > 4) {
@@ -120,7 +148,7 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
       if (response.ok) {
         toast({
           title: "Role Updated",
-          description: `${username}'s role has been updated successfully.`,
+          description: `${username}'s role has been updated to ${newRoleId} successfully.`,
         })
         router.refresh()
       } else {
@@ -129,7 +157,7 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
         toast({
           variant: "destructive",
           title: "Error",
-          description: data.error || "Role update not supported. Server needs to be updated.",
+          description: data.error || "Role update failed. Check server logs.",
         })
       }
     } catch (error) {
@@ -146,7 +174,12 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
   return (
     <div className="space-y-2 sm:space-y-3 mt-4">
       <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-        <Button onClick={handleBanToggle} disabled={loading} variant={isBanned ? "outline" : "destructive"} size="sm">
+        <Button
+          onClick={handleBanToggle}
+          disabled={loading || !canBanOrDelete}
+          variant={isBanned ? "outline" : "destructive"}
+          size="sm"
+        >
           {isBanned ? (
             <>
               <UserCheck className="w-4 h-4 mr-1" />
@@ -163,7 +196,11 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
         {canDelete && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm" disabled={loading}>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={loading || !canBanOrDelete}
+              >
                 <Trash2 className="w-4 h-4 mr-1" />
                 Delete User
               </Button>
@@ -178,7 +215,11 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-red-600 hover:bg-red-700"
+                  disabled={!canBanOrDelete}
+                >
                   Delete User
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -188,7 +229,7 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
       </div>
 
       <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:gap-2">
-        <Select value={selectedRole} onValueChange={setSelectedRole} disabled={loading}>
+        <Select value={selectedRole} onValueChange={setSelectedRole} disabled={loading || !canUpdateRole}>
           <SelectTrigger className="w-full sm:w-40 h-8 text-xs sm:text-sm">
             <SelectValue placeholder="Select Role" />
           </SelectTrigger>
@@ -201,7 +242,7 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
         </Select>
         <Button
           onClick={handleRoleChange}
-          disabled={loading || selectedRole === roleId.toString()}
+          disabled={loading || !canUpdateRole || selectedRole === roleId.toString()}
           variant="outline"
           size="sm"
           className="w-full sm:w-auto h-8"
