@@ -29,7 +29,6 @@ export default function Header() {
     remember: false,
   })
   const [loading, setLoading] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false) // State to track scroll
   const router = useRouter()
   const pathname = usePathname()
   const { toast } = useToast()
@@ -52,14 +51,6 @@ export default function Header() {
       setUser(null)
     }
   }
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10) // Apply glassy effect after 10px scroll
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -120,12 +111,8 @@ export default function Header() {
   }
 
   return (
-    <div className={`bg-white border border-gray-300 sticky top-0 z-10 transition-all duration-300 ${
-      isScrolled ? "bg-white/80 backdrop-blur-md" : ""
-    }`}>
-      <div className={`bg-gray-100 border-b border-gray-300 px-4 py-2 transition-all duration-300 ${
-        isScrolled ? "bg-gray-100/80 backdrop-blur-md" : ""
-      }`}>
+    <div className="bg-white border border-gray-300">
+      <div className="bg-gray-100 border-b border-gray-300 px-4 py-2">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
@@ -278,6 +265,24 @@ export default function Header() {
               </>
             )}
           </div>
+        </div>
+      </div>
+
+      <div className="bg-gray-50 border-b border-gray-300 px-4 py-3">
+        <div className="max-w-7xl mx-auto text-center text-sm text-gray-700">
+          <p>
+            CIT-U Forum is a platform dedicated to academic collaboration and student discussion. Our forum provides
+            access to course-specific discussions, study resources, and a community of students and faculty.
+            {!user && (
+              <>
+                {" "}
+                <Link href="/register" className="text-blue-600 hover:underline font-medium">
+                  Create a free account
+                </Link>{" "}
+                to unlock all features and join the academic community.
+              </>
+            )}
+          </p>
         </div>
       </div>
     </div>
