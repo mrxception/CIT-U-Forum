@@ -100,12 +100,21 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
 
   const handleRoleChange = async () => {
     if (!selectedRole) return
+    const newRoleId = Number.parseInt(selectedRole)
+    if (isNaN(newRoleId) || newRoleId < 1 || newRoleId > 4) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Invalid role selected.",
+      })
+      return
+    }
     setLoading(true)
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "changeRole", roleId: Number.parseInt(selectedRole) }),
+        body: JSON.stringify({ action: "updateRole", roleId: newRoleId }),
       })
 
       if (response.ok) {
@@ -116,10 +125,11 @@ export default function AdminControls({ userId, isBanned, canDelete, username, r
         router.refresh()
       } else {
         const data = await response.json()
+        console.log("API Response:", data) 
         toast({
           variant: "destructive",
           title: "Error",
-          description: data.error || "Failed to update user role",
+          description: data.error || "Failed to update user role. Check server logs.",
         })
       }
     } catch (error) {
