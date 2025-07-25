@@ -1,17 +1,22 @@
 "use client"
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
-interface Params {
-  slug?: string[];
-}
+export default function CatchAllPage() {
+  const params = useParams();
+  const [isNotFound, setIsNotFound] = useState(false);
 
-export default function CatchAllPage({ params }: { params: Params }) {
   useEffect(() => {
     document.title = "404 - Page Not Found | CIT-U Forum";
-  }, []);
-
-  const isNotFound = !params.slug || params.slug.length === 0 || !["login", "register", "user"].includes(params.slug[0]);
+    if (params && params.slug) {
+      setIsNotFound(
+        !params.slug || params.slug.length === 0 || !["login", "register", "user"].includes(params.slug[0])
+      );
+    } else {
+      setIsNotFound(true); 
+    }
+  }, [params]);
 
   if (!isNotFound) {
     return null;
